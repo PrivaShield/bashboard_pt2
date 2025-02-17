@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>보안 대시보드</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 30px;
+            background-color: #f9fafb;
+        }
+
+        .dashboard {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .chart-container {
+            padding: 20px;
+            background: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .chart-title {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .total-count {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        #sensitiveInfoChart {
+            max-width: 400px;
+            margin: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <div class="chart-container">
+            <h3 class="chart-title">한 달간 감지된 민감 텍스트</h3>
+            <h1 id="totalCount" class="total-count">0건</h1>
+            <p>이번 달 총 감지 건수</p>
+            <canvas id="dailyRiskChart"></canvas>
+        </div>
+
+        <div class="chart-container">
+            <h3 class="chart-title">유형별 민감 정보</h3>
+            <canvas id="sensitiveInfoChart"></canvas>
+        </div>
+    </div>
+
+    <script>
+        const dailyRiskData = [
+            { date: "03/01", detection_count: 12 },
+            { date: "03/02", detection_count: 7 },
+            { date: "03/03", detection_count: 14 },
+            { date: "03/04", detection_count: 8 },
+            { date: "03/05", detection_count: 27 }
+        ];
+
+        const sensitiveInfoData = {
+            labels: ["주민등록번호", "신용카드", "계좌번호", "기타"],
+            values: [40, 30, 20, 10]
+        };
+
+        document.getElementById('totalCount').innerText = dailyRiskData.reduce((acc, val) => acc + val.detection_count, 0) + '건';
+
+        function drawBarChart(id, labels, values) {
+            const ctx = document.getElementById(id).getContext("2d");
+            new Chart(ctx, {
+                type: "bar",
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: "rgba(104, 132, 245, 0.7)",
+                        borderColor: "rgba(104, 132, 245, 1)",
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: { grid: { display: false } },
+                        y: { grid: { display: false }, beginAtZero: true }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        function drawPieChart(id, labels, values) {
+            const ctx = document.getElementById(id).getContext("2d");
+            new Chart(ctx, {
+                type: "pie",
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: ["#818cf8", "#f87171", "#fbbf24", "#34d399"]
+                    }]
+                },
+                options: { responsive: true, plugins: { legend: { position: "bottom" } } }
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            drawBarChart("dailyRiskChart", dailyRiskData.map(item => item.date), dailyRiskData.map(item => item.detection_count));
+            drawPieChart("sensitiveInfoChart", sensitiveInfoData.labels, sensitiveInfoData.values);
+        });
+    </script>
+</body>
+</html>
